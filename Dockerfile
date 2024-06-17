@@ -4,7 +4,7 @@
 # docker run --rm -ti             --entrypoint bash foobar
 # docker run --rm -ti --user root --entrypoint bash foobar
 
-FROM docker.io/library/ubuntu:22.04
+FROM docker.io/library/ubuntu:24.04@sha256:e3f92abc0967a6c19d0dfa2d55838833e947b9d74edbcb0113e48535ad4be12a
 
 LABEL org.opencontainers.image.source https://github.com/ajaykumar4/argocd-plugins
 
@@ -28,9 +28,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 RUN groupadd -g $ARGOCD_USER_ID argocd && \
     useradd -r -u $ARGOCD_USER_ID -g argocd argocd && \
-    mkdir -p /home/argocd && \
-    chown argocd:0 /home/argocd && \
-    chmod g=u /home/argocd
+    mkdir -p /custom-tools && \
+    chown argocd:0 /custom-tools && \
+    chmod g=u /custom-tools
 
 # aws
 # https://www.educative.io/collection/page/6630002/6521965765984256/6553354502668288
@@ -76,7 +76,7 @@ RUN groupadd -g $ARGOCD_USER_ID argocd && \
 
 # binary versions
 # renovate: datasource=github-tags depName=FiloSottile/age
-ARG AGE_VERSION=v1.1.1
+ARG AGE_VERSION=v1.2.0
 # renovate: datasource=github-tags depName=jqlang/jq
 ARG JQ_VERSION=1.7.1
 ARG HELM2_VERSION=v2.17.0
@@ -89,7 +89,7 @@ ARG KUSTOMIZE_VERSION=5.4.2
 # renovate: datasource=github-tags depName=mozilla/sops
 ARG SOPS_VERSION=v3.8.1
 # renovate: datasource=github-tags depName=mikefarah/yq
-ARG YQ_VERSION=v4.44.1
+ARG YQ_VERSION=v4.44.2
 # renovate: datasource=github-tags depName=helmfile/vals
 ARG VALS_VERSION=0.37.2
 # renovate: datasource=github-tags depName=viaduct-ai/kustomize-sops
@@ -105,7 +105,6 @@ ARG KREW_VERSION=v0.4.4
 
 RUN \
     GO_ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/') && \
-    mkdir -p /custom-tools && \
     wget -qO-                          "https://get.helm.sh/helm-${HELM2_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /tmp linux-${GO_ARCH}/helm && mv /tmp/helm /custom-tools/helm-v2 && \
     wget -qO-                          "https://get.helm.sh/helm-${HELM3_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /tmp linux-${GO_ARCH}/helm && mv /tmp/helm /custom-tools/helm-v3 && \
     wget -qO "/custom-tools/sops"      "https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${GO_ARCH}" && \
@@ -134,9 +133,9 @@ RUN \
 ENV USER=argocd
 USER $ARGOCD_USER_ID
 
-WORKDIR /home/argocd/cmp-server/config/
+WORKDIR /custom-tools/cmp-server/config/
 COPY plugin.yaml ./
-WORKDIR /home/argocd
+WORKDIR /custom-tools
 
 # repo-server containers use /helm-working-dir (empty dir volume helm-working-dir)
 #
@@ -144,27 +143,27 @@ WORKDIR /home/argocd
 # HELM_CONFIG_HOME=/helm-working-dir
 # HELM_DATA_HOME=/helm-working-dir
 #
-ENV HELM_CACHE_HOME=/home/argocd/helm/cache
-#ENV HELM_CONFIG_HOME=/home/argocd/helm/config
-ENV HELM_DATA_HOME=/home/argocd/helm/data
-ENV KREW_ROOT=/home/argocd/krew
+ENV HELM_CACHE_HOME=/custom-tools/.helm/cache
+#ENV HELM_CONFIG_HOME=/custom-tools/.helm/config
+ENV HELM_DATA_HOME=/custom-tools/.helm/data
+ENV KREW_ROOT=/custom-tools/.krew
 ENV PATH="/custom-tools:${KREW_ROOT}/bin:$PATH"
 
 # plugin versions
  # renovate: datasource=github-tags depName=databus23/helm-diff
-ARG HELM_DIFF_VERSION=v3.9.7
+ARG HELM_DIFF_VERSION=v3.9.8
 # renovate: datasource=github-tags depName=aslafy-z/helm-git
 ARG HELM_GIT_VERSION=v0.16.0
 # renovate: datasource=github-tags depName=jkroepke/helm-secrets
 ARG HELM_SECRETS_VERSION=v4.6.0
 
 RUN \
-  helm-v3 plugin install https://github.com/databus23/helm-diff   --version ${HELM_DIFF_VERSION} && \
-  helm-v3 plugin install https://github.com/aslafy-z/helm-git     --version ${HELM_GIT_VERSION} && \
-  helm-v3 plugin install https://github.com/jkroepke/helm-secrets --version ${HELM_SECRETS_VERSION} && \
-  kubectl krew update && \
-  mkdir -p ${KREW_ROOT}/bin && \
-  true
+    mkdir -p ${KREW_ROOT}/bin && \
+    helm-v3 plugin install https://github.com/databus23/helm-diff   --version ${HELM_DIFF_VERSION} && \
+    helm-v3 plugin install https://github.com/aslafy-z/helm-git     --version ${HELM_GIT_VERSION} && \
+    helm-v3 plugin install https://github.com/jkroepke/helm-secrets --version ${HELM_SECRETS_VERSION} && \
+    kubectl krew update && \
+    true
 
 # array is exec form, string is shell form
 # this binary in injected via a shared folder with the repo server
