@@ -148,7 +148,7 @@ ENV PATH="/custom-tools:${KREW_ROOT}/bin:$PATH"
 
 # plugin versions
  # renovate: datasource=github-tags depName=databus23/helm-diff
-ARG HELM_DIFF_VERSION=v3.9.7
+ARG HELM_DIFF_VERSION=v3.9.8
 # renovate: datasource=github-tags depName=aslafy-z/helm-git
 ARG HELM_GIT_VERSION=v0.16.0
 # renovate: datasource=github-tags depName=jkroepke/helm-secrets
