@@ -4,11 +4,9 @@
 # docker run --rm -ti             --entrypoint bash foobar
 # docker run --rm -ti --user root --entrypoint bash foobar
 
-ARG BASE_IMAGE=docker.io/library/ubuntu:24.04@sha256:e3f92abc0967a6c19d0dfa2d55838833e947b9d74edbcb0113e48535ad4be12a
+FROM docker.io/library/ubuntu:24.04@sha256:e3f92abc0967a6c19d0dfa2d55838833e947b9d74edbcb0113e48535ad4be12a
 
-FROM $BASE_IMAGE
-
-LABEL org.opencontainers.image.source https://github.com/ajaykumar4/argocd-helmfile
+LABEL org.opencontainers.image.source https://github.com/ajaykumar4/argocd-plugins
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ARGOCD_USER_ID=999
@@ -77,7 +75,7 @@ RUN groupadd -g $ARGOCD_USER_ID argocd && \
 
 # binary versions
 # renovate: datasource=github-tags depName=FiloSottile/age
-ARG AGE_VERSION=v1.1.1
+ARG AGE_VERSION=v1.2.0
 # renovate: datasource=github-tags depName=jqlang/jq
 ARG JQ_VERSION=1.7.1
 ARG HELM2_VERSION=v2.17.0
@@ -90,9 +88,11 @@ ARG KUSTOMIZE_VERSION=5.4.2
 # renovate: datasource=github-tags depName=mozilla/sops
 ARG SOPS_VERSION=v3.8.1
 # renovate: datasource=github-tags depName=mikefarah/yq
-ARG YQ_VERSION=v4.44.1
+ARG YQ_VERSION=v4.44.2
 # renovate: datasource=github-tags depName=helmfile/vals
 ARG VALS_VERSION=0.37.2
+# renovate: datasource=github-tags depName=viaduct-ai/kustomize-sops
+ARG KSOPS_VERSION=4.3.1
 
 # relevant for kubectl if installed
 # renovate: datasource=github-tags depName=bitnami-labs/sealed-secrets
@@ -116,6 +116,11 @@ RUN \
     wget -qO-                          "https://github.com/kubernetes-sigs/krew/releases/download/${KREW_VERSION}/krew-linux_${GO_ARCH}.tar.gz" | tar zxv -C /tmp ./krew-linux_${GO_ARCH} && mv /tmp/krew-linux_${GO_ARCH} /usr/local/bin/kubectl-krew && \
     wget -qO-                          "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin kubeseal && \
     wget -qO-                          "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin kustomize && \
+    true
+
+RUN \
+    GO_ARCH=$(uname -m | sed -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/') && \
+    wget -qO-                          "https://github.com/viaduct-ai/kustomize-sops/releases/download/v${KSOPS_VERSION}/ksops_${KSOPS_VERSION}_Linux_${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin ksops && \
     true
 
 COPY src/*.sh /usr/local/bin/
@@ -145,9 +150,9 @@ ENV PATH="${KREW_ROOT}/bin:$PATH"
 
 # plugin versions
  # renovate: datasource=github-tags depName=databus23/helm-diff
-ARG HELM_DIFF_VERSION=v3.9.7
+ARG HELM_DIFF_VERSION=v3.9.8
 # renovate: datasource=github-tags depName=aslafy-z/helm-git
-ARG HELM_GIT_VERSION=v0.16.0
+ARG HELM_GIT_VERSION=v0.16.1
 # renovate: datasource=github-tags depName=jkroepke/helm-secrets
 ARG HELM_SECRETS_VERSION=v4.6.0
 
