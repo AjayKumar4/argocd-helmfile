@@ -4,7 +4,7 @@
 # docker run --rm -ti             --entrypoint bash foobar
 # docker run --rm -ti --user root --entrypoint bash foobar
 
-FROM quay.io/viaductoss/ksops:v4.3.1 AS ksops
+FROM quay.io/viaductoss/ksops:v4.3.1@sha256:332ef56b52e3abc323eab2bcb64a2f8f28263710319c758ed30e2772e0da160c AS ksops
 
 FROM docker.io/library/ubuntu:24.04@sha256:e3f92abc0967a6c19d0dfa2d55838833e947b9d74edbcb0113e48535ad4be12a
 
