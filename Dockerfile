@@ -91,7 +91,7 @@ ARG KUSTOMIZE_VERSION=5.4.2
 # renovate: datasource=github-tags depName=mozilla/sops
 ARG SOPS_VERSION=v3.8.1
 # renovate: datasource=github-tags depName=mikefarah/yq
-ARG YQ_VERSION=v4.44.1
+ARG YQ_VERSION=v4.44.2
 # renovate: datasource=github-tags depName=helmfile/vals
 ARG VALS_VERSION=0.37.2
 
