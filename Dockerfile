@@ -6,7 +6,7 @@
 
 FROM quay.io/viaductoss/ksops:v4.3.1 AS ksops
 
-FROM docker.io/library/ubuntu:22.04
+FROM docker.io/library/ubuntu:24.04@sha256:e3f92abc0967a6c19d0dfa2d55838833e947b9d74edbcb0113e48535ad4be12a
 
 LABEL org.opencontainers.image.source https://github.com/ajaykumar4/argocd-plugins
 
