@@ -28,9 +28,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 RUN groupadd -g $ARGOCD_USER_ID argocd && \
     useradd -r -u $ARGOCD_USER_ID -g argocd argocd && \
-    mkdir -p /custom-tools && \
-    chown argocd:0 /custom-tools && \
-    chmod g=u /custom-tools
+    mkdir -p /home/argocd && \
+    chown argocd:0 /home/argocd && \
+    chmod g=u /home/argocd
 
 # aws
 # https://www.educative.io/collection/page/6630002/6521965765984256/6553354502668288
@@ -105,37 +105,37 @@ ARG KREW_VERSION=v0.4.4
 
 RUN \
     GO_ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/') && \
-    wget -qO-                          "https://get.helm.sh/helm-${HELM2_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /tmp linux-${GO_ARCH}/helm && mv /tmp/helm /custom-tools/helm-v2 && \
-    wget -qO-                          "https://get.helm.sh/helm-${HELM3_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /tmp linux-${GO_ARCH}/helm && mv /tmp/helm /custom-tools/helm-v3 && \
-    wget -qO "/custom-tools/sops"      "https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${GO_ARCH}" && \
-    wget -qO-                          "https://github.com/FiloSottile/age/releases/download/${AGE_VERSION}/age-${AGE_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /custom-tools age/age age/age-keygen && \
-    wget -qO-                          "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_${GO_ARCH}.tar.gz" | tar zxv -C /custom-tools helmfile && \
-    wget -qO-                          "https://github.com/helmfile/vals/releases/download/v${VALS_VERSION}/vals_${VALS_VERSION}_linux_${GO_ARCH}.tar.gz" | tar zxv -C /custom-tools vals && \
-    wget -qO "/custom-tools/yq"        "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${GO_ARCH}" && \
-    wget -qO "/custom-tools/jq"        "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-${GO_ARCH}" && \
-    wget -qO "/custom-tools/kubectl"   "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${GO_ARCH}/kubectl" && \
-    wget -qO-                          "https://github.com/kubernetes-sigs/krew/releases/download/${KREW_VERSION}/krew-linux_${GO_ARCH}.tar.gz" | tar zxv -C /tmp ./krew-linux_${GO_ARCH} && mv /tmp/krew-linux_${GO_ARCH} /custom-tools/kubectl-krew && \
-    wget -qO-                          "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv -C /custom-tools kubeseal && \
-    wget -qO-                          "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_${GO_ARCH}.tar.gz" | tar zxv -C /custom-tools kustomize && \
+    wget -qO-                          "https://get.helm.sh/helm-${HELM2_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /tmp linux-${GO_ARCH}/helm && mv /tmp/helm /usr/local/bin/helm-v2 && \
+    wget -qO-                          "https://get.helm.sh/helm-${HELM3_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /tmp linux-${GO_ARCH}/helm && mv /tmp/helm /usr/local/bin/helm-v3 && \
+    wget -qO "/usr/local/bin/sops"      "https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${GO_ARCH}" && \
+    wget -qO-                          "https://github.com/FiloSottile/age/releases/download/${AGE_VERSION}/age-${AGE_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv --strip-components=1 -C /usr/local/bin age/age age/age-keygen && \
+    wget -qO-                          "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin helmfile && \
+    wget -qO-                          "https://github.com/helmfile/vals/releases/download/v${VALS_VERSION}/vals_${VALS_VERSION}_linux_${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin vals && \
+    wget -qO "/usr/local/bin/yq"        "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${GO_ARCH}" && \
+    wget -qO "/usr/local/bin/jq"        "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-${GO_ARCH}" && \
+    wget -qO "/usr/local/bin/kubectl"   "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${GO_ARCH}/kubectl" && \
+    wget -qO-                          "https://github.com/kubernetes-sigs/krew/releases/download/${KREW_VERSION}/krew-linux_${GO_ARCH}.tar.gz" | tar zxv -C /tmp ./krew-linux_${GO_ARCH} && mv /tmp/krew-linux_${GO_ARCH} /usr/local/bin/kubectl-krew && \
+    wget -qO-                          "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION}/kubeseal-${KUBESEAL_VERSION}-linux-${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin kubeseal && \
+    wget -qO-                          "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin kustomize && \
     true
 
 RUN \
 GO_ARCH=$(uname -m | sed -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/') && \
-wget -qO-                          "https://github.com/viaduct-ai/kustomize-sops/releases/download/v${KSOPS_VERSION}/ksops_${KSOPS_VERSION}_Linux_${GO_ARCH}.tar.gz" | tar zxv -C /custom-tools ksops && \
+wget -qO-                          "https://github.com/viaduct-ai/kustomize-sops/releases/download/v${KSOPS_VERSION}/ksops_${KSOPS_VERSION}_Linux_${GO_ARCH}.tar.gz" | tar zxv -C /usr/local/bin ksops && \
 true
 
-COPY src/*.sh /custom-tools/
+COPY src/*.sh /usr/local/bin/
 
 RUN \
-    ln -sf /custom-tools/helm-v3 /custom-tools/helm && \
-    chown root:root /custom-tools/* && chmod 755 /custom-tools/*
+    ln -sf /usr/local/bin/helm-v3 /usr/local/bin/helm && \
+    chown root:root /usr/local/bin/* && chmod 755 /usr/local/bin/*
     
 ENV USER=argocd
 USER $ARGOCD_USER_ID
 
-WORKDIR /custom-tools/cmp-server/config/
+WORKDIR /home/argocd/cmp-server/config/
 COPY plugin.yaml ./
-WORKDIR /custom-tools
+WORKDIR /usr/local/bin
 
 # repo-server containers use /helm-working-dir (empty dir volume helm-working-dir)
 #
@@ -143,17 +143,17 @@ WORKDIR /custom-tools
 # HELM_CONFIG_HOME=/helm-working-dir
 # HELM_DATA_HOME=/helm-working-dir
 #
-ENV HELM_CACHE_HOME=/custom-tools/.helm/cache
-#ENV HELM_CONFIG_HOME=/custom-tools/.helm/config
-ENV HELM_DATA_HOME=/custom-tools/.helm/data
-ENV KREW_ROOT=/custom-tools/.krew
-ENV PATH="/custom-tools:${KREW_ROOT}/bin:$PATH"
+ENV HELM_CACHE_HOME=/home/argocd/helm/cache
+#ENV HELM_CONFIG_HOME=/home/argocd/helm/config
+ENV HELM_DATA_HOME=/home/argocd/helm/data
+ENV KREW_ROOT=/home/argocd/krew
+ENV PATH="/usr/local/bin:${KREW_ROOT}/bin:$PATH"
 
 # plugin versions
  # renovate: datasource=github-tags depName=databus23/helm-diff
 ARG HELM_DIFF_VERSION=v3.9.8
 # renovate: datasource=github-tags depName=aslafy-z/helm-git
-ARG HELM_GIT_VERSION=v0.16.1
+ARG HELM_GIT_VERSION=v0.16.0
 # renovate: datasource=github-tags depName=jkroepke/helm-secrets
 ARG HELM_SECRETS_VERSION=v4.6.0
 
